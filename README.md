@@ -72,6 +72,7 @@ Starts a proxy that listens on a `port` and `endpoint`, and sends messages to th
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { createHeaderAuth, startSSEServer } from "mcp-proxy";
 
+
 const { close } = await startSSEServer({
   port: 8080,
   endpoint: "/sse",

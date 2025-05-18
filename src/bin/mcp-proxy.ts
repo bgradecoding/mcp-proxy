@@ -121,7 +121,6 @@ const proxy = async () => {
 
     return server;
   };
-
   if (argv.server === "sse") {
     await startSSEServer({
       createServer,
