@@ -4,6 +4,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { EventSource } from "eventsource";
 import { setTimeout } from "node:timers";
+import http from "http";
 import util from "node:util";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
@@ -105,36 +106,37 @@ const proxy = async () => {
 
   console.info("starting the %s server on port %d", argv.server, argv.port);
 
-  const createServer = async () => {
+  const createServer = async (req: http.IncomingMessage) => {
     const server = new Server(serverVersion, {
       capabilities: serverCapabilities,
     });
 
-    proxyServer({
+    await proxyServer({
+      authenticate: argv.userId ? createHeaderAuth(argv.userId) : undefined,
       client,
+      request: req,
       server,
       serverCapabilities,
     });
 
     return server;
   };
-
-    if (argv.server === "sse") {
-      await startSSEServer({
-        createServer,
-        endpoint: argv.endpoint || ("/sse" as `/${string}`),
-        port: argv.port,
-        authenticate: argv.userId ? createHeaderAuth(argv.userId) : undefined,
-      });
-    } else {
-      await startHTTPStreamServer({
-        createServer,
-        endpoint: argv.endpoint || ("/stream" as `/${string}`),
-        eventStore: new InMemoryEventStore(),
-        port: argv.port,
-        authenticate: argv.userId ? createHeaderAuth(argv.userId) : undefined,
-      });
-    }
+  if (argv.server === "sse") {
+    await startSSEServer({
+      createServer,
+      endpoint: argv.endpoint || ("/sse" as `/${string}`),
+      port: argv.port,
+      authenticate: argv.userId ? createHeaderAuth(argv.userId) : undefined,
+    });
+  } else {
+    await startHTTPStreamServer({
+      createServer,
+      endpoint: argv.endpoint || ("/stream" as `/${string}`),
+      eventStore: new InMemoryEventStore(),
+      port: argv.port,
+      authenticate: argv.userId ? createHeaderAuth(argv.userId) : undefined,
+    });
+  }
 };
 
 const main = async () => {

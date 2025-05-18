@@ -47,6 +47,8 @@ Sets up a proxy between a server and a client.
 const transport = new StdioClientTransport();
 const client = new Client();
 
+// import { createHeaderAuth } from "mcp-proxy";
+
 const server = new Server(serverVersion, {
   capabilities: {},
 });
@@ -55,6 +57,8 @@ proxyServer({
   server,
   client,
   capabilities: {},
+  authenticate: createHeaderAuth("user123"),
+  request, // the HTTP request if available
 });
 ```
 
@@ -76,7 +80,6 @@ const { close } = await startSSEServer({
     return new Server();
   },
   authenticate: createHeaderAuth("user123"),
-
 });
 
 close();
