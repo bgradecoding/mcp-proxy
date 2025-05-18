@@ -13,7 +13,6 @@ import { InMemoryEventStore } from "../InMemoryEventStore.js";
 import { proxyServer } from "../proxyServer.js";
 import { startHTTPStreamServer } from "../startHTTPStreamServer.js";
 import { startSSEServer } from "../startSSEServer.js";
-import { createHeaderAuth } from "../headerAuth.js";
 import { StdioClientTransport } from "../StdioClientTransport.js";
 import { createHeaderAuth } from "../headerAuth.js";
 
@@ -93,7 +92,7 @@ const proxy = async () => {
     },
     {
       capabilities: {},
-    },
+    }
   );
 
   await connect(client);
