@@ -1,5 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import http from "http";
 import {
   CallToolRequestSchema,
   CompleteRequestSchema,
@@ -17,11 +18,15 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 export const proxyServer = async ({
+  authenticate,
   client,
+  request,
   server,
   serverCapabilities,
 }: {
+  authenticate?: (req: http.IncomingMessage) => boolean | Promise<boolean>;
   client: Client;
+  request: http.IncomingMessage;
   server: Server;
   serverCapabilities: ServerCapabilities;
 }): Promise<void> => {
@@ -86,10 +91,18 @@ export const proxyServer = async ({
 
   if (serverCapabilities?.tools) {
     server.setRequestHandler(CallToolRequestSchema, async (args) => {
+      if (authenticate && !(await authenticate(request))) {
+        throw new Error("Unauthorized");
+      }
+
       return client.callTool(args.params);
     });
 
     server.setRequestHandler(ListToolsRequestSchema, async (args) => {
+      if (authenticate && !(await authenticate(request))) {
+        throw new Error("Unauthorized");
+      }
+
       return client.listTools(args.params);
     });
   }
