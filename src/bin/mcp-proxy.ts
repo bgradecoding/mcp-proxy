@@ -4,6 +4,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { EventSource } from "eventsource";
 import { setTimeout } from "node:timers";
+import http from "http";
 import util from "node:util";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
@@ -90,7 +91,7 @@ const proxy = async () => {
     },
     {
       capabilities: {},
-    },
+    }
   );
 
   await connect(client);
@@ -126,11 +127,14 @@ const proxy = async () => {
     return server;
   };
 
+  const auth = argv.userId ? createHeaderAuth(argv.userId) : undefined;
+
   if (argv.server === "sse") {
     await startSSEServer({
       createServer,
       endpoint: argv.endpoint || ("/sse" as `/${string}`),
       port: argv.port,
+      authenticate: auth,
     });
   } else {
     await startHTTPStreamServer({
@@ -138,6 +142,7 @@ const proxy = async () => {
       endpoint: argv.endpoint || ("/stream" as `/${string}`),
       eventStore: new InMemoryEventStore(),
       port: argv.port,
+      authenticate: auth,
     });
   }
 };

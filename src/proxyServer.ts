@@ -27,9 +27,13 @@ export const proxyServer = async ({
   authenticate?: (req: http.IncomingMessage) => boolean | Promise<boolean>;
   client: Client;
   request: http.IncomingMessage;
+
   server: Server;
   serverCapabilities: ServerCapabilities;
 }): Promise<void> => {
+  if (authenticate && request && !(await authenticate(request))) {
+    throw new Error("Unauthorized");
+  }
   if (serverCapabilities?.logging) {
     server.setNotificationHandler(
       LoggingMessageNotificationSchema,

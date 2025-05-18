@@ -1,5 +1,4 @@
 import http from "http";
-
 export const createHeaderAuth = (userId: string) => {
   return (req: http.IncomingMessage): boolean => {
     const value = Array.isArray(req.headers["x-user-id"])
