@@ -33,6 +33,7 @@ options:
 - `--endpoint`: Specify the endpoint to listen on (default: `/sse` for SSE server, `/stream` for stream server)
 - `--server`: Specify the server type to use (default: `sse`)
 - `--debug`: Enable debug logging
+- `--user-id`: Require this value in the `x-user-id` header
 
 ### Node.js SDK
 
@@ -65,7 +66,7 @@ Starts a proxy that listens on a `port` and `endpoint`, and sends messages to th
 
 ```ts
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { startSSEServer } from "mcp-proxy";
+import { createHeaderAuth, startSSEServer } from "mcp-proxy";
 
 const { close } = await startSSEServer({
   port: 8080,
@@ -73,6 +74,7 @@ const { close } = await startSSEServer({
   createServer: async () => {
     return new Server();
   },
+  authenticate: createHeaderAuth("user123"),
 });
 
 close();
@@ -84,7 +86,11 @@ Starts a proxy that listens on a `port` and `endpoint`, and sends messages to th
 
 ```ts
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { startHTTPStreamServer, InMemoryEventStore } from "mcp-proxy";
+import {
+  createHeaderAuth,
+  startHTTPStreamServer,
+  InMemoryEventStore,
+} from "mcp-proxy";
 
 const { close } = await startHTTPStreamServer({
   port: 8080,
@@ -93,6 +99,7 @@ const { close } = await startHTTPStreamServer({
     return new Server();
   },
   eventStore: new InMemoryEventStore(), // optional you can provide your own event store
+  authenticate: createHeaderAuth("user123"),
 });
 
 close();
