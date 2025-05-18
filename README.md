@@ -33,7 +33,7 @@ options:
 - `--endpoint`: Specify the endpoint to listen on (default: `/sse` for SSE server, `/stream` for stream server)
 - `--server`: Specify the server type to use (default: `sse`)
 - `--debug`: Enable debug logging
-- `--user-id`: Require this value in the `x-user-id` header
+- `--user-id`: Require this value in the `x-user-id` header before tools can be used
 
 
 ### Node.js SDK
@@ -60,6 +60,20 @@ proxyServer({
   capabilities: {},
   authenticate: createHeaderAuth("user123"),
   request, // the HTTP request if available
+});
+```
+
+The proxy supports optional authentication. Provide an `authenticate`
+function along with the HTTP `request` used to create the server. Tool
+requests will only be processed when authentication succeeds.
+
+```ts
+proxyServer({
+  server,
+  client,
+  capabilities: {},
+  authenticate: createHeaderAuth("user123"),
+  request,
 });
 ```
 

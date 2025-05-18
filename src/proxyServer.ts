@@ -26,7 +26,8 @@ export const proxyServer = async ({
 }: {
   authenticate?: (req: http.IncomingMessage) => boolean | Promise<boolean>;
   client: Client;
-  request?: http.IncomingMessage;
+  request: http.IncomingMessage;
+
   server: Server;
   serverCapabilities: ServerCapabilities;
 }): Promise<void> => {
@@ -94,10 +95,18 @@ export const proxyServer = async ({
 
   if (serverCapabilities?.tools) {
     server.setRequestHandler(CallToolRequestSchema, async (args) => {
+      if (authenticate && !(await authenticate(request))) {
+        throw new Error("Unauthorized");
+      }
+
       return client.callTool(args.params);
     });
 
     server.setRequestHandler(ListToolsRequestSchema, async (args) => {
+      if (authenticate && !(await authenticate(request))) {
+        throw new Error("Unauthorized");
+      }
+
       return client.listTools(args.params);
     });
   }

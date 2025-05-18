@@ -13,8 +13,9 @@ import { InMemoryEventStore } from "../InMemoryEventStore.js";
 import { proxyServer } from "../proxyServer.js";
 import { startHTTPStreamServer } from "../startHTTPStreamServer.js";
 import { startSSEServer } from "../startSSEServer.js";
-import { StdioClientTransport } from "../StdioClientTransport.js";
 import { createHeaderAuth } from "../headerAuth.js";
+import { StdioClientTransport } from "../StdioClientTransport.js";
+import http from "http";
 
 util.inspect.defaultOptions.depth = 8;
 
@@ -59,9 +60,7 @@ const argv = await yargs(hideBin(process.argv))
       type: "string",
     },
     "user-id": {
-      describe:
-        "Require this user id in the x-user-id header for authentication",
-
+      describe: "Require this x-user-id header for tool calls",
       type: "string",
     },
   })
@@ -106,6 +105,10 @@ const proxy = async () => {
     capabilities: Record<string, unknown>;
   };
 
+  const authenticate = argv.userId
+    ? createHeaderAuth(argv.userId as string)
+    : undefined;
+
   console.info("starting the %s server on port %d", argv.server, argv.port);
 
   const createServer = async (req: http.IncomingMessage) => {
@@ -113,8 +116,8 @@ const proxy = async () => {
       capabilities: serverCapabilities,
     });
 
-    await proxyServer({
-      authenticate: argv.userId ? createHeaderAuth(argv.userId) : undefined,
+    proxyServer({
+      authenticate,
       client,
       request: req,
       server,
