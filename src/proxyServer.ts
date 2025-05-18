@@ -1,5 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import http from "http";
 import {
   CallToolRequestSchema,
   CompleteRequestSchema,
@@ -17,14 +18,21 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 export const proxyServer = async ({
+  authenticate,
   client,
+  request,
   server,
   serverCapabilities,
 }: {
+  authenticate?: (req: http.IncomingMessage) => boolean | Promise<boolean>;
   client: Client;
+  request?: http.IncomingMessage;
   server: Server;
   serverCapabilities: ServerCapabilities;
 }): Promise<void> => {
+  if (authenticate && request && !(await authenticate(request))) {
+    throw new Error("Unauthorized");
+  }
   if (serverCapabilities?.logging) {
     server.setNotificationHandler(
       LoggingMessageNotificationSchema,

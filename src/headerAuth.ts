@@ -13,7 +13,6 @@ export const createHeaderAuth = (userId: string) => {
     return value === userId;
   };
 };
-
 /** Default user id for {@link headerAuth}. */
 export const AUTH_USER_ID = "user123";
 

@@ -4,6 +4,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { EventSource } from "eventsource";
 import { setTimeout } from "node:timers";
+import http from "http";
 import util from "node:util";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
@@ -12,6 +13,7 @@ import { InMemoryEventStore } from "../InMemoryEventStore.js";
 import { proxyServer } from "../proxyServer.js";
 import { startHTTPStreamServer } from "../startHTTPStreamServer.js";
 import { startSSEServer } from "../startSSEServer.js";
+import { createHeaderAuth } from "../headerAuth.js";
 import { StdioClientTransport } from "../StdioClientTransport.js";
 import { createHeaderAuth } from "../headerAuth.js";
 
@@ -60,6 +62,7 @@ const argv = await yargs(hideBin(process.argv))
     "user-id": {
       describe:
         "Require this user id in the x-user-id header for authentication",
+
       type: "string",
     },
   })
@@ -106,13 +109,15 @@ const proxy = async () => {
 
   console.info("starting the %s server on port %d", argv.server, argv.port);
 
-  const createServer = async () => {
+  const createServer = async (req: http.IncomingMessage) => {
     const server = new Server(serverVersion, {
       capabilities: serverCapabilities,
     });
 
-    proxyServer({
+    await proxyServer({
+      authenticate: argv.userId ? createHeaderAuth(argv.userId) : undefined,
       client,
+      request: req,
       server,
       serverCapabilities,
     });
