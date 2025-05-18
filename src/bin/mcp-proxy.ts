@@ -15,6 +15,7 @@ import { startHTTPStreamServer } from "../startHTTPStreamServer.js";
 import { startSSEServer } from "../startSSEServer.js";
 import { createHeaderAuth } from "../headerAuth.js";
 import { StdioClientTransport } from "../StdioClientTransport.js";
+import { createHeaderAuth } from "../headerAuth.js";
 
 util.inspect.defaultOptions.depth = 8;
 
@@ -59,7 +60,9 @@ const argv = await yargs(hideBin(process.argv))
       type: "string",
     },
     "user-id": {
-      describe: "Require this x-user-id header for requests",
+      describe:
+        "Require this user id in the x-user-id header for authentication",
+
       type: "string",
     },
   })
@@ -121,12 +124,15 @@ const proxy = async () => {
 
     return server;
   };
+
+  const auth = argv.userId ? createHeaderAuth(argv.userId) : undefined;
+
   if (argv.server === "sse") {
     await startSSEServer({
       createServer,
       endpoint: argv.endpoint || ("/sse" as `/${string}`),
       port: argv.port,
-      authenticate: argv.userId ? createHeaderAuth(argv.userId) : undefined,
+      authenticate: auth,
     });
   } else {
     await startHTTPStreamServer({
@@ -134,7 +140,7 @@ const proxy = async () => {
       endpoint: argv.endpoint || ("/stream" as `/${string}`),
       eventStore: new InMemoryEventStore(),
       port: argv.port,
-      authenticate: argv.userId ? createHeaderAuth(argv.userId) : undefined,
+      authenticate: auth,
     });
   }
 };
