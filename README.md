@@ -65,7 +65,7 @@ Starts a proxy that listens on a `port` and `endpoint`, and sends messages to th
 
 ```ts
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { startSSEServer } from "mcp-proxy";
+import { headerAuth, startSSEServer } from "mcp-proxy";
 
 const { close } = await startSSEServer({
   port: 8080,
@@ -73,6 +73,7 @@ const { close } = await startSSEServer({
   createServer: async () => {
     return new Server();
   },
+  authenticate: headerAuth,
 });
 
 close();
@@ -84,7 +85,7 @@ Starts a proxy that listens on a `port` and `endpoint`, and sends messages to th
 
 ```ts
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { startHTTPStreamServer, InMemoryEventStore } from "mcp-proxy";
+import { headerAuth, startHTTPStreamServer, InMemoryEventStore } from "mcp-proxy";
 
 const { close } = await startHTTPStreamServer({
   port: 8080,
@@ -93,6 +94,7 @@ const { close } = await startHTTPStreamServer({
     return new Server();
   },
   eventStore: new InMemoryEventStore(), // optional you can provide your own event store
+  authenticate: headerAuth,
 });
 
 close();

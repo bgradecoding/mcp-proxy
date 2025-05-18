@@ -19,6 +19,7 @@ type ServerLike = {
 };
 
 export const startHTTPStreamServer = async <T extends ServerLike>({
+  authenticate,
   createServer,
   endpoint,
   eventStore,
@@ -27,6 +28,7 @@ export const startHTTPStreamServer = async <T extends ServerLike>({
   onUnhandledRequest,
   port,
 }: {
+  authenticate?: (req: http.IncomingMessage) => boolean | Promise<boolean>;
   createServer: (request: http.IncomingMessage) => Promise<T>;
   endpoint: string;
   eventStore?: EventStore;
@@ -71,6 +73,11 @@ export const startHTTPStreamServer = async <T extends ServerLike>({
 
     if (req.method === "GET" && req.url === `/ping`) {
       res.writeHead(200).end("pong");
+      return;
+    }
+
+    if (authenticate && !(await authenticate(req))) {
+      res.writeHead(401).end("Unauthorized");
       return;
     }
 
