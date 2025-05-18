@@ -22,7 +22,7 @@ npm install mcp-proxy
 ### Command-line
 
 ```bash
-npx mcp-proxy --port 8080 --endpoint /sse tsx server.js
+npx mcp-proxy --port 8080 --endpoint /sse --user-id user123 tsx server.js
 ```
 
 This starts a server and `stdio` server (`tsx server.js`). The server listens on port 8080 and endpoint `/sse` by default, and forwards messages to the `stdio` server.
@@ -33,6 +33,7 @@ options:
 - `--endpoint`: Specify the endpoint to listen on (default: `/sse` for SSE server, `/stream` for stream server)
 - `--server`: Specify the server type to use (default: `sse`)
 - `--debug`: Enable debug logging
+- `--user-id`: Require this `x-user-id` header value for incoming requests
 
 ### Node.js SDK
 
@@ -46,6 +47,8 @@ Sets up a proxy between a server and a client.
 const transport = new StdioClientTransport();
 const client = new Client();
 
+// import { createHeaderAuth } from "mcp-proxy";
+
 const server = new Server(serverVersion, {
   capabilities: {},
 });
@@ -54,6 +57,8 @@ proxyServer({
   server,
   client,
   capabilities: {},
+  authenticate: createHeaderAuth("user123"),
+  request, // the HTTP request if available
 });
 ```
 
@@ -65,7 +70,7 @@ Starts a proxy that listens on a `port` and `endpoint`, and sends messages to th
 
 ```ts
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { startSSEServer } from "mcp-proxy";
+import { createHeaderAuth, startSSEServer } from "mcp-proxy";
 
 const { close } = await startSSEServer({
   port: 8080,
@@ -73,6 +78,7 @@ const { close } = await startSSEServer({
   createServer: async () => {
     return new Server();
   },
+  authenticate: createHeaderAuth("user123"),
 });
 
 close();
@@ -84,7 +90,7 @@ Starts a proxy that listens on a `port` and `endpoint`, and sends messages to th
 
 ```ts
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { startHTTPStreamServer, InMemoryEventStore } from "mcp-proxy";
+import { createHeaderAuth, startHTTPStreamServer, InMemoryEventStore } from "mcp-proxy";
 
 const { close } = await startHTTPStreamServer({
   port: 8080,
@@ -93,6 +99,7 @@ const { close } = await startHTTPStreamServer({
     return new Server();
   },
   eventStore: new InMemoryEventStore(), // optional you can provide your own event store
+  authenticate: createHeaderAuth("user123"),
 });
 
 close();

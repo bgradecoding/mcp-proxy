@@ -48,7 +48,7 @@ it("proxies messages between HTTP stream and stdio servers", async () => {
   const onClose = vi.fn();
 
   await startHTTPStreamServer({
-    createServer: async () => {
+    createServer: async (req) => {
       const mcpServer = new Server(serverVersion, {
         capabilities: serverCapabilities,
       });
@@ -57,6 +57,7 @@ it("proxies messages between HTTP stream and stdio servers", async () => {
         client: stdioClient,
         server: mcpServer,
         serverCapabilities,
+        request: req,
       });
 
       return mcpServer;
