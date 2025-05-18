@@ -9,6 +9,7 @@ import { expect, it, vi } from "vitest";
 
 import { proxyServer } from "./proxyServer.js";
 import { startSSEServer } from "./startSSEServer.js";
+import { createHeaderAuth } from "./headerAuth.js";
 
 if (!("EventSource" in global)) {
   // @ts-expect-error - figure out how to use --experimental-eventsource with vitest
@@ -124,4 +125,18 @@ it("proxies messages between SSE and stdio servers", async () => {
   await delay(100);
 
   expect(onClose).toHaveBeenCalled();
+});
+
+it("rejects unauthorized SSE connections", async () => {
+  const port = await getRandomPort();
+
+  await startSSEServer({
+    authenticate: createHeaderAuth("abc"),
+    createServer: async () => new Server(),
+    endpoint: "/sse",
+    port,
+  });
+
+  const res = await fetch(`http://localhost:${port}/sse`);
+  expect(res.status).toBe(401);
 });

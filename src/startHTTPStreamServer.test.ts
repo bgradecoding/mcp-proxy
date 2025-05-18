@@ -9,6 +9,7 @@ import { expect, it, vi } from "vitest";
 
 import { proxyServer } from "./proxyServer.js";
 import { startHTTPStreamServer } from "./startHTTPStreamServer.js";
+import { createHeaderAuth } from "./headerAuth.js";
 
 if (!("EventSource" in global)) {
   // @ts-expect-error - figure out how to use --experimental-eventsource with vitest
@@ -127,4 +128,21 @@ it("proxies messages between HTTP stream and stdio servers", async () => {
   await delay(1000);
 
   expect(onClose).toHaveBeenCalled();
+});
+
+it("rejects unauthorized HTTP stream requests", async () => {
+  const port = await getRandomPort();
+
+  await startHTTPStreamServer({
+    authenticate: createHeaderAuth("abc"),
+    createServer: async () => new Server(),
+    endpoint: "/stream",
+    port,
+  });
+
+  const res = await fetch(`http://localhost:${port}/stream`, {
+    method: "POST",
+    body: JSON.stringify({ jsonrpc: "2.0", method: "", params: {} }),
+  });
+  expect(res.status).toBe(401);
 });

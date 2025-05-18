@@ -13,6 +13,7 @@ import { proxyServer } from "../proxyServer.js";
 import { startHTTPStreamServer } from "../startHTTPStreamServer.js";
 import { startSSEServer } from "../startSSEServer.js";
 import { StdioClientTransport } from "../StdioClientTransport.js";
+import { createHeaderAuth } from "../headerAuth.js";
 
 util.inspect.defaultOptions.depth = 8;
 
@@ -54,6 +55,10 @@ const argv = await yargs(hideBin(process.argv))
       choices: ["sse", "stream"],
       default: "sse",
       describe: "The server type to use (sse or stream)",
+      type: "string",
+    },
+    userId: {
+      describe: "Require requests to include this x-user-id header",
       type: "string",
     },
   })
@@ -114,14 +119,20 @@ const proxy = async () => {
     return server;
   };
 
+  const authenticate = argv.userId
+    ? createHeaderAuth(argv.userId)
+    : undefined;
+
   if (argv.server === "sse") {
     await startSSEServer({
+      authenticate,
       createServer,
       endpoint: argv.endpoint || ("/sse" as `/${string}`),
       port: argv.port,
     });
   } else {
     await startHTTPStreamServer({
+      authenticate,
       createServer,
       endpoint: argv.endpoint || ("/stream" as `/${string}`),
       eventStore: new InMemoryEventStore(),

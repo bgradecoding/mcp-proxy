@@ -12,6 +12,7 @@ type ServerLike = {
 };
 
 export const startSSEServer = async <T extends ServerLike>({
+  authenticate,
   createServer,
   endpoint,
   onClose,
@@ -19,6 +20,7 @@ export const startSSEServer = async <T extends ServerLike>({
   onUnhandledRequest,
   port,
 }: {
+  authenticate?: (req: http.IncomingMessage) => boolean | Promise<boolean>;
   createServer: (request: http.IncomingMessage) => Promise<T>;
   endpoint: string;
   onClose?: (server: T) => void;
@@ -62,6 +64,11 @@ export const startSSEServer = async <T extends ServerLike>({
     if (req.method === "GET" && req.url === `/ping`) {
       res.writeHead(200).end("pong");
 
+      return;
+    }
+
+    if (authenticate && !(await authenticate(req))) {
+      res.writeHead(401).end("Unauthorized");
       return;
     }
 
