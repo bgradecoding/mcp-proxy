@@ -35,6 +35,11 @@ options:
 - `--debug`: Enable debug logging
 - `--user-id`: Require this value in the `x-user-id` header before tools can be used
 
+> [!NOTE]
+> The `mcp-proxy` CLI connects to a single MCP process over `stdio`. To proxy multiple
+> MCP servers concurrently, start separate CLI instances or create a custom script
+> using `startMultiStdioServer`.
+
 
 ### Node.js SDK
 
@@ -135,6 +140,25 @@ await startStdioServer({
   serverType: ServerType.SSE,
   url: "http://127.0.0.1:3000/sse",
 });
+```
+
+#### `startMultiStdioServer`
+
+Starts multiple stdio proxies concurrently. Pass an array of `startStdioServer` options.
+
+```ts
+import {
+  ServerType,
+  startMultiStdioServer,
+  type StartStdioServerOptions,
+} from "mcp-proxy";
+
+const configs: StartStdioServerOptions[] = [
+  { serverType: ServerType.SSE, url: "http://127.0.0.1:3000/sse" },
+  { serverType: ServerType.HTTPStream, url: "http://127.0.0.1:3000/mcp" },
+];
+
+await startMultiStdioServer(configs);
 ```
 
 #### `tapTransport`
