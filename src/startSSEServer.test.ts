@@ -29,7 +29,7 @@ it("proxies messages between SSE and stdio servers", async () => {
     },
     {
       capabilities: {},
-    },
+    }
   );
 
   await stdioClient.connect(stdioTransport);
@@ -77,12 +77,12 @@ it("proxies messages between SSE and stdio servers", async () => {
     },
     {
       capabilities: {},
-    },
+    }
   );
 
   const transport = createAuthenticatedSSEClientTransport(
     new URL(`http://localhost:${port}/sse`),
-    AUTH_USER_ID,
+    AUTH_USER_ID
   );
 
   await sseClient.connect(transport);
@@ -98,7 +98,7 @@ it("proxies messages between SSE and stdio servers", async () => {
   });
 
   expect(
-    await sseClient.readResource({ uri: result.resources[0].uri }, {}),
+    await sseClient.readResource({ uri: result.resources[0].uri }, {})
   ).toEqual({
     contents: [
       {

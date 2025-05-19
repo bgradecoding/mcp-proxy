@@ -8,14 +8,12 @@ import http from "http";
 import util from "node:util";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-
 import { InMemoryEventStore } from "../InMemoryEventStore.js";
 import { proxyServer } from "../proxyServer.js";
 import { startHTTPStreamServer } from "../startHTTPStreamServer.js";
 import { startSSEServer } from "../startSSEServer.js";
 import { createHeaderAuth } from "../headerAuth.js";
 import { StdioClientTransport } from "../StdioClientTransport.js";
-import http from "http";
 
 util.inspect.defaultOptions.depth = 8;
 
@@ -105,9 +103,11 @@ const proxy = async () => {
     capabilities: Record<string, unknown>;
   };
 
+  console.log("argv.userId", argv.userId);
   const authenticate = argv.userId
     ? createHeaderAuth(argv.userId as string)
     : undefined;
+  console.log("authenticate", authenticate);
 
   console.info("starting the %s server on port %d", argv.server, argv.port);
 

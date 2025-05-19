@@ -5,7 +5,6 @@ import { StreamableHTTPClientTransportOptions } from "@modelcontextprotocol/sdk/
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-
 import { proxyServer } from "./proxyServer.js";
 
 export enum ServerType {
@@ -36,7 +35,7 @@ export const startStdioServer = async ({
     default:
       transport = new StreamableHTTPClientTransport(
         new URL(url),
-        transportOptions,
+        transportOptions
       );
   }
   const streamClient = initStreamClient
@@ -48,7 +47,7 @@ export const startStdioServer = async ({
         },
         {
           capabilities: {},
-        },
+        }
       );
   await streamClient.connect(transport);
 

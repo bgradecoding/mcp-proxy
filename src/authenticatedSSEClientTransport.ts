@@ -1,4 +1,9 @@
-import { SSEClientTransport, SSEClientTransportOptions } from "@modelcontextprotocol/sdk/client/sse.js";
+import {
+  SSEClientTransport,
+  SSEClientTransportOptions,
+} from "@modelcontextprotocol/sdk/client/sse.js";
+
+export const AUTH_USER_ID = "user123";
 
 /**
  * Create an SSE client transport that always sends the provided `x-user-id`
@@ -7,18 +12,19 @@ import { SSEClientTransport, SSEClientTransportOptions } from "@modelcontextprot
 export const createAuthenticatedSSEClientTransport = (
   url: URL,
   userId: string,
-  options: SSEClientTransportOptions = {},
+  options: SSEClientTransportOptions = {}
 ): SSEClientTransport => {
-  const headers = { "x-user-id": userId };
   return new SSEClientTransport(url, {
     ...options,
     eventSourceInit: {
       ...(options.eventSourceInit ?? {}),
-      headers: { ...(options.eventSourceInit?.headers ?? {}), ...headers },
     },
     requestInit: {
       ...(options.requestInit ?? {}),
-      headers: { ...(options.requestInit?.headers ?? {}), ...headers },
+      headers: {
+        ...(options.requestInit?.headers ?? {}),
+        "X-User-Id": userId,
+      },
     },
   });
 };

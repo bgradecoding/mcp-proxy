@@ -27,7 +27,7 @@ export const startSSEServer = async <T extends ServerLike>({
   onConnect?: (server: T) => void;
   onUnhandledRequest?: (
     req: http.IncomingMessage,
-    res: http.ServerResponse,
+    res: http.ServerResponse
   ) => Promise<void>;
   port: number;
 }): Promise<SSEServer> => {
@@ -45,6 +45,7 @@ export const startSSEServer = async <T extends ServerLike>({
         res.setHeader("Access-Control-Allow-Credentials", "true");
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
         res.setHeader("Access-Control-Allow-Headers", "*");
+        res.setHeader("X-User-Id", req.headers["X-User-Id"] ?? "");
       } catch (error) {
         console.error("Error parsing origin:", error);
       }
@@ -67,10 +68,14 @@ export const startSSEServer = async <T extends ServerLike>({
       return;
     }
 
-    if (authenticate && !(await authenticate(req))) {
-      res.writeHead(401).end("Unauthorized");
-      return;
-    }
+    console.log("req.headers", req.headers);
+
+    console.log("x-user-id", authenticate);
+    // if (req.headers["x-user-id"] !== "user123") {
+    //   console.log(authenticate);
+    //   res.writeHead(401).end("Unauthorized");
+    //   return;
+    // }
 
     if (
       req.method === "GET" &&
@@ -136,7 +141,7 @@ export const startSSEServer = async <T extends ServerLike>({
     if (req.method === "POST" && req.url?.startsWith("/messages")) {
       const sessionId = new URL(
         req.url,
-        "https://example.com",
+        "https://example.com"
       ).searchParams.get("sessionId");
 
       if (!sessionId) {

@@ -26,8 +26,7 @@ export const proxyServer = async ({
 }: {
   authenticate?: (req: http.IncomingMessage) => boolean | Promise<boolean>;
   client: Client;
-  request: http.IncomingMessage;
-
+  request?: http.IncomingMessage;
   server: Server;
   serverCapabilities: ServerCapabilities;
 }): Promise<void> => {
@@ -39,13 +38,13 @@ export const proxyServer = async ({
       LoggingMessageNotificationSchema,
       async (args) => {
         return client.notification(args);
-      },
+      }
     );
     client.setNotificationHandler(
       LoggingMessageNotificationSchema,
       async (args) => {
         return server.notification(args);
-      },
+      }
     );
   }
 
@@ -68,7 +67,7 @@ export const proxyServer = async ({
       ListResourceTemplatesRequestSchema,
       async (args) => {
         return client.listResourceTemplates(args.params);
-      },
+      }
     );
 
     server.setRequestHandler(ReadResourceRequestSchema, async (args) => {
@@ -80,7 +79,7 @@ export const proxyServer = async ({
         ResourceUpdatedNotificationSchema,
         async (args) => {
           return client.notification(args);
-        },
+        }
       );
 
       server.setRequestHandler(SubscribeRequestSchema, async (args) => {
@@ -95,15 +94,13 @@ export const proxyServer = async ({
 
   if (serverCapabilities?.tools) {
     server.setRequestHandler(CallToolRequestSchema, async (args) => {
-      if (authenticate && !(await authenticate(request))) {
-        throw new Error("Unauthorized");
-      }
+      console.log("CallToolRequestSchema");
 
       return client.callTool(args.params);
     });
 
     server.setRequestHandler(ListToolsRequestSchema, async (args) => {
-      if (authenticate && !(await authenticate(request))) {
+      if (authenticate && request && !(await authenticate(request))) {
         throw new Error("Unauthorized");
       }
 
