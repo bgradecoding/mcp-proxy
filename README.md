@@ -148,3 +148,17 @@ const transport = tapTransport(new StdioClientTransport(), (event) => {
   console.log(event);
 });
 ```
+
+#### `createAuthenticatedSSEClientTransport`
+
+Creates an `SSEClientTransport` that automatically adds an `x-user-id` header to
+both the initial SSE connection and subsequent POST requests.
+
+```ts
+import { createAuthenticatedSSEClientTransport } from "mcp-proxy";
+
+const transport = createAuthenticatedSSEClientTransport(
+  new URL("http://localhost:8080/sse"),
+  "user123",
+);
+```
