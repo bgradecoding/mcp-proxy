@@ -1,5 +1,4 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { EventSource } from "eventsource";
@@ -9,6 +8,8 @@ import { expect, it, vi } from "vitest";
 
 import { proxyServer } from "./proxyServer.js";
 import { startSSEServer } from "./startSSEServer.js";
+import { AUTH_USER_ID, headerAuth } from "./headerAuth.js";
+import { createAuthenticatedSSEClientTransport } from "./authenticatedSSEClientTransport.js";
 
 if (!("EventSource" in global)) {
   // @ts-expect-error - figure out how to use --experimental-eventsource with vitest
@@ -63,6 +64,7 @@ it("proxies messages between SSE and stdio servers", async () => {
       return mcpServer;
     },
     endpoint: "/sse",
+    authenticate: headerAuth,
     onClose,
     onConnect,
     port,
@@ -78,8 +80,9 @@ it("proxies messages between SSE and stdio servers", async () => {
     },
   );
 
-  const transport = new SSEClientTransport(
+  const transport = createAuthenticatedSSEClientTransport(
     new URL(`http://localhost:${port}/sse`),
+    AUTH_USER_ID,
   );
 
   await sseClient.connect(transport);
